@@ -8,6 +8,7 @@ import Image from "next/image"
 import { EnvelopeTooltipWrapper } from "./envelope-tooltip"
 import { Textarea } from "@/components/ui/textarea"
 import { Input } from "@/components/ui/input"
+import Typewriter from "./Typewriter"
 
 interface LetterData {
   date: string
@@ -25,6 +26,8 @@ export default function InteractiveEnvelopeLetter() {
   const contentRef = useRef<HTMLDivElement>(null)
   const [isClient, setIsClient] = useState(false)
   const letterIdRef = useRef<string>("")
+  const [hasPlayedTypewriter, setHasPlayedTypewriter] = useState(false)
+  const prevEditMode = useRef(true)
 
   // Envelope data state replaced by two simple fields
   // (see above for new state)
@@ -79,6 +82,13 @@ export default function InteractiveEnvelopeLetter() {
       }
     }
   }, [isOpen])
+
+  useEffect(() => {
+    if (!isEditMode && prevEditMode.current) {
+      setHasPlayedTypewriter(false)
+    }
+    prevEditMode.current = isEditMode
+  }, [isEditMode])
 
   const toggleEnvelope = () => {
     if (envelopeSide === "original" || isOpen) {
@@ -368,9 +378,17 @@ export default function InteractiveEnvelopeLetter() {
               />
             ) : (
               <div className="space-y-4 leading-6 text-base">
-                {letterData.content.split("\n").map((paragraph, index) => (
-                  <p key={index}>{paragraph}</p>
-                ))}
+                {!hasPlayedTypewriter ? (
+                  <Typewriter
+                    paragraphs={letterData.content.split("\n")}
+                    speed={36}
+                    onDone={() => setHasPlayedTypewriter(true)}
+                  />
+                ) : (
+                  letterData.content.split("\n").map((paragraph, index) => (
+                    <p key={index}>{paragraph}</p>
+                  ))
+                )}
               </div>
             )}
           </div>
