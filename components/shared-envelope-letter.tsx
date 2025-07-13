@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import Image from "next/image"
 import { EnvelopeTooltipWrapper } from "./envelope-tooltip"
+import Typewriter from "./Typewriter"
 
 interface SharedEnvelopeLetterProps {
   letterId: string
@@ -30,6 +31,8 @@ export default function SharedEnvelopeLetter({ letterId }: SharedEnvelopeLetterP
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [isClient, setIsClient] = useState(false)
+  const [hasPlayedTypewriter, setHasPlayedTypewriter] = useState(false)
+  const prevIsOpen = useRef(false)
 
   // Ensure we're on the client side
   useEffect(() => {
@@ -82,6 +85,13 @@ export default function SharedEnvelopeLetter({ letterId }: SharedEnvelopeLetterP
         currentRef?.removeEventListener("scroll", handleScroll)
       }
     }
+  }, [isOpen])
+
+  useEffect(() => {
+    if (isOpen && !prevIsOpen.current) {
+      setHasPlayedTypewriter(false)
+    }
+    prevIsOpen.current = isOpen
   }, [isOpen])
 
   const toggleEnvelope = () => {
@@ -280,9 +290,17 @@ export default function SharedEnvelopeLetter({ letterId }: SharedEnvelopeLetterP
           {/* Letter Content */}
           <div ref={contentRef} className="flex-1 overflow-y-auto pr-2 relative">
             <div className="space-y-4 leading-6 text-base">
-              {letterData.content.split("\n").map((paragraph, index) => (
-                <p key={index}>{paragraph}</p>
-              ))}
+              {!hasPlayedTypewriter ? (
+                <Typewriter
+                  paragraphs={letterData.content.split("\n")}
+                  speed={36}
+                  onDone={() => setHasPlayedTypewriter(true)}
+                />
+              ) : (
+                letterData.content.split("\n").map((paragraph, index) => (
+                  <p key={index}>{paragraph}</p>
+                ))
+              )}
             </div>
           </div>
 
