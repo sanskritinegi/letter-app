@@ -7,8 +7,8 @@ import { ThemeProvider } from "@/components/theme-provider"
 const inter = Inter({ subsets: ["latin"] })
 
 export const metadata: Metadata = {
-  title: "Sanskriti's farewell letter",
-  description: "Open to see her message for you",
+  title: "Create your custom letter",
+  description: "Start writing and sharing your own message.",
   generator: "v0.dev",
 }
 
