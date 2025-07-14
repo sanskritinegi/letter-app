@@ -104,31 +104,22 @@ export default function InteractiveEnvelopeLetter() {
     setLetterData((prev) => ({ ...prev, [field]: value }))
   }
 
-  const handleShare = () => {
-    // Only run on client side
-    if (!isClient || !letterIdRef.current) return
-
-    const shareUrl = `${window.location.origin}/share/${letterIdRef.current}`;
-    
-    // Store the current letter data in localStorage
-    localStorage.setItem(`letter_${letterIdRef.current}`, JSON.stringify({
-      letterData,
-      timestamp: Date.now()
-    }));
-    
-    // Copy to clipboard
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      alert('Share link copied to clipboard!');
-    }).catch(() => {
-      // Fallback for older browsers
-      const textArea = document.createElement('textarea');
-      textArea.value = shareUrl;
-      document.body.appendChild(textArea);
-      textArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(textArea);
-      alert('Share link copied to clipboard!');
-    });
+  const handleShare = async () => {
+    if (!isClient) return
+    try {
+      const res = await fetch("/api/letters", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ letterData }),
+      })
+      const data = await res.json()
+      if (!data.id) throw new Error("No ID returned from server")
+      const shareUrl = `${window.location.origin}/share/${data.id}`
+      await navigator.clipboard.writeText(shareUrl)
+      alert("Share link copied to clipboard!")
+    } catch (err) {
+      alert("Failed to share letter. Please try again.")
+    }
   }
 
   return (

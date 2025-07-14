@@ -40,22 +40,20 @@ export default function SharedEnvelopeLetter({ letterId }: SharedEnvelopeLetterP
   }, [])
 
   useEffect(() => {
-    // Only run on client side
     if (!isClient) return
-
-    try {
-      const storedData = localStorage.getItem(`letter_${letterId}`)
-      if (storedData) {
-        const parsedData = JSON.parse(storedData)
-        setLetterData(parsedData.letterData)
-      } else {
-        setError("Letter not found. It may have expired or the link is invalid.")
-      }
-    } catch (err) {
-      setError("Error loading letter data.")
-    } finally {
-      setIsLoading(false)
-    }
+    setIsLoading(true)
+    setError(null)
+    fetch(`/api/letters?id=${letterId}`)
+      .then(res => res.json())
+      .then(data => {
+        if (data.letterData) {
+          setLetterData(data.letterData)
+        } else {
+          setError("Letter not found. It may have expired or the link is invalid.")
+        }
+      })
+      .catch(() => setError("Error loading letter data."))
+      .finally(() => setIsLoading(false))
   }, [letterId, isClient])
 
   // Check if content is scrollable
